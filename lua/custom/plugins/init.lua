@@ -33,3 +33,22 @@ do
   require('oil').setup {}
   vim.keymap.set('n', '-', '<CMD>Oil<CR>', { desc = 'Open parent directory' })
 end
+
+-- Package cleaning
+do
+  vim.api.nvim_create_user_command('VimPackClean', function()
+    local plugins = vim.pack.get()
+    local inactive_names = {}
+
+    for _, pkg in ipairs(plugins) do
+      if not pkg.active then table.insert(inactive_names, pkg.spec.name) end
+    end
+
+    if #inactive_names > 0 then
+      print('Cleaning inactive packages: ' .. table.concat(inactive_names, ', '))
+      vim.pack.del(inactive_names)
+    else
+      print 'No inactive packages to clean.'
+    end
+  end, {})
+end
