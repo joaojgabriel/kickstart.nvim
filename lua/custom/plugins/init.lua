@@ -25,6 +25,7 @@ vim.pack.add { gh 'tpope/vim-fugitive' }
 do
   vim.pack.add { gh 'akinsho/toggleterm.nvim' }
   require('toggleterm').setup {}
+  vim.keymap.set('n', '<leader>tt', '<cmd>ToggleTerm<CR>', { desc = '[T]oggle [T]erminal' })
 end
 
 -- File navigation
