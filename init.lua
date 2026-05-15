@@ -446,6 +446,7 @@ do
         '%.import$',
         '%.tscn$',
         '%.tres$',
+        '%.uid$',
         'export_presets.cfg',
       },
     },
