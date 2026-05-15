@@ -16,9 +16,20 @@ end
 ---@return string
 local function gh(repo) return 'https://github.com/' .. repo end
 
-vim.keymap.set("n", "<leader>cd", ":cd %:p:h<CR>", { desc = "cd to current buffer" })
+vim.keymap.set('n', '<leader>cd', ':cd %:p:h<CR>', { desc = 'cd to current buffer' })
 
+-- Git integration
+vim.pack.add { gh 'tpope/vim-fugitive' }
 
-vim.pack.add{ gh 'tpope/vim-fugitive' }
+-- Terminal
+do
+  vim.pack.add { gh 'akinsho/toggleterm.nvim' }
+  require('toggleterm').setup {}
+end
 
-vim.pack.add {gh 'akinsho/toggleterm.nvim'}
+-- File navigation
+do
+  vim.pack.add { gh 'stevearc/oil.nvim' }
+  require('oil').setup {}
+  vim.keymap.set('n', '-', '<CMD>Oil<CR>', { desc = 'Open parent directory' })
+end
