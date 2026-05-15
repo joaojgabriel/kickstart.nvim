@@ -20,3 +20,5 @@ vim.keymap.set("n", "<leader>cd", ":cd %:p:h<CR>", { desc = "cd to current buffe
 
 
 vim.pack.add{ gh 'tpope/vim-fugitive' }
+
+vim.pack.add {gh 'akinsho/toggleterm.nvim'}
