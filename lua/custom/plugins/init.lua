@@ -11,3 +11,12 @@ for file_name, type in vim.fs.dir(plugins_dir) do
     require('custom.plugins.' .. module)
   end
 end
+---
+---@param repo string
+---@return string
+local function gh(repo) return 'https://github.com/' .. repo end
+
+vim.keymap.set("n", "<leader>cd", ":cd %:p:h<CR>", { desc = "cd to current buffer" })
+
+
+vim.pack.add{ gh 'tpope/vim-fugitive' }
