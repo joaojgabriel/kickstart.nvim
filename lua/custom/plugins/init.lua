@@ -63,3 +63,13 @@ do
     'https://github.com/nvim-treesitter/nvim-treesitter',
   }
 end
+
+-- Odin
+do
+  vim.pack.add { gh 'cephei8/odin.nvim' }
+end
+
+-- Git
+do
+  vim.pack.add { gh 'NeogitOrg/neogit' }
+end

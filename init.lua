@@ -58,7 +58,7 @@ do
   vim.o.number = true
   -- You can also add relative line numbers, to help with jumping.
   --  Experiment for yourself to see if you like it!
-  -- vim.o.relativenumber = true
+  vim.o.relativenumber = true
 
   -- Enable mouse mode, can be useful for resizing splits for example!
   vim.o.mouse = 'a'
@@ -74,6 +74,10 @@ do
 
   -- Enable break indent
   vim.o.breakindent = true
+  -- vim.o.tabstop = 3          -- Number of spaces a tab represents
+  -- vim.o.shiftwidth = 3       -- Number of spaces for each indentation
+  -- vim.o.expandtab = true     -- Convert tabs to spaces
+  -- vim.o.smartindent = true    -- Enable smart indentation
 
   -- Enable undo/redo changes even after closing and reopening a file
   vim.o.undofile = true
@@ -86,7 +90,8 @@ do
   vim.o.signcolumn = 'yes'
 
   -- Decrease update time
-  vim.o.updatetime = 250
+  -- TODO: Change back to 250 for non-battery-saving
+  vim.o.updatetime = 500
 
   -- Decrease mapped sequence wait time
   vim.o.timeoutlen = 300
@@ -120,6 +125,9 @@ do
   -- See `:help 'confirm'`
   vim.o.confirm = true
 
+  -- Odin format config
+  vim.env.ODIN_FMT_CONFIG = vim.fn.expand '~/.config/odin/odinfmt.json'
+
   -- [[ Basic Keymaps ]]
   --  See `:help vim.keymap.set()`
 
@@ -136,7 +144,8 @@ do
     underline = { severity = { min = vim.diagnostic.severity.WARN } },
 
     -- Can switch between these as you prefer
-    virtual_text = true, -- Text shows up at the end of the line
+    -- TODO: Change back to true for non-battery saving
+    virtual_text = false, -- Text shows up at the end of the line
     virtual_lines = false, -- Text shows up underneath the line, with virtual lines
 
     -- Auto open the float, so you can easily read the errors when jumping with `[d` and `]d`
@@ -299,16 +308,17 @@ do
   --
   -- See `:help gitsigns` to understand what each configuration key does.
   -- Adds git related signs to the gutter, as well as utilities for managing changes
-  vim.pack.add { gh 'lewis6991/gitsigns.nvim' }
-  require('gitsigns').setup {
-    signs = {
-      add = { text = '+' }, ---@diagnostic disable-line: missing-fields
-      change = { text = '~' }, ---@diagnostic disable-line: missing-fields
-      delete = { text = '_' }, ---@diagnostic disable-line: missing-fields
-      topdelete = { text = '‾' }, ---@diagnostic disable-line: missing-fields
-      changedelete = { text = '~' }, ---@diagnostic disable-line: missing-fields
-    },
-  }
+  -- TODO: add back
+  -- vim.pack.add { gh 'lewis6991/gitsigns.nvim' }
+  -- require('gitsigns').setup {
+  --  signs = {
+  --  add = { text = '+' }, ---@diagnostic disable-line: missing-fields
+  --  change = { text = '~' }, ---@diagnostic disable-line: missing-fields
+  --  delete = { text = '_' }, ---@diagnostic disable-line: missing-fields
+  --  topdelete = { text = '‾' }, ---@diagnostic disable-line: missing-fields
+  --  changedelete = { text = '~' }, ---@diagnostic disable-line: missing-fields
+  --},
+  --}
 
   -- Useful plugin to show you pending keybinds.
   vim.pack.add { gh 'folke/which-key.nvim' }
@@ -448,7 +458,12 @@ do
         '%.tscn$',
         '%.tre$',
         '%.res$',
-        '%.tres$',
+        '%.asset$',
+        '%.fbx$',
+        '%.mat$',
+        '%.unity$',
+        '%.shader',
+        '%.meta$',
         '%.glb$',
         '%.jpg$',
         '%.ogg$',
@@ -614,6 +629,8 @@ do
       --
       -- When you move your cursor, the highlights will be cleared (the second autocommand).
       local client = vim.lsp.get_client_by_id(event.data.client_id)
+      -- TODO: Uncomment when not battery-saving
+      --[[
       if client and client:supports_method('textDocument/documentHighlight', event.buf) then
         local highlight_augroup = vim.api.nvim_create_augroup('kickstart-lsp-highlight', { clear = false })
         vim.api.nvim_create_autocmd({ 'CursorHold', 'CursorHoldI' }, {
@@ -636,6 +653,7 @@ do
           end,
         })
       end
+      ]]
 
       -- The following code creates a keymap to toggle inlay hints in your
       -- code, if the language server you are using supports them
@@ -652,7 +670,18 @@ do
   --  See `:help lsp-config` for information about keys and how to configure
   ---@type table<string, vim.lsp.Config>
   local servers = {
-    -- clangd = {},
+    ols = {
+      init_options = {
+        checker_args = '-vet -strict-style',
+      },
+    },
+    clangd = {
+      cmd = {
+        'clangd',
+        '--background-index',
+        '--completion-style=detailed',
+      },
+    },
     -- gopls = {},
     -- pyright = {},
     -- rust_analyzer = {},
@@ -688,6 +717,15 @@ do
               '${3rd}/luv/library',
               '${3rd}/busted/library',
             }),
+            ignoreDir = {
+              '.git',
+              '.build',
+              'target',
+              'node_modules',
+              '.cache',
+            },
+            maxPreload = 1000,
+            preloadFileSize = 150,
           },
         })
       end,
@@ -757,12 +795,20 @@ do
     },
     -- You can also specify external formatters in here.
     formatters_by_ft = {
+      odin = { 'odinfmt' },
       -- rust = { 'rustfmt' },
       -- Conform can also run multiple formatters sequentially
       -- python = { "isort", "black" },
       --
       -- You can use 'stop_after_first' to run the first available formatter from the list
       -- javascript = { "prettierd", "prettier", stop_after_first = true },
+    },
+    formatters = {
+      odinfmt = {
+        command = 'odinfmt',
+        args = { '-stdin' },
+        stdin = true,
+      },
     },
   }
 
@@ -865,7 +911,7 @@ do
   vim.pack.add { { src = gh 'nvim-treesitter/nvim-treesitter', version = 'main' } }
 
   -- Ensure basic parsers are installed
-  local parsers = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc' }
+  local parsers = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc', 'odin' }
   require('nvim-treesitter').install(parsers)
 
   ---@param buf integer
