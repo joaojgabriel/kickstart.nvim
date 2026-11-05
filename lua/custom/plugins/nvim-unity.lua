@@ -254,6 +254,8 @@ local roslyn_ls_config = {
     -- Replacement: `vim.lsp.log.get_filename()`.
     '--extensionLogDirectory=' .. vim.fs.dirname(vim.lsp.log.get_filename()),
     '--stdio',
+    '--autoLoadProjects',
+    '--daemon-mode',
   },
   filetypes = { 'cs' },
   handlers = M.roslyn_handlers,
@@ -318,14 +320,23 @@ local roslyn_ls_config = {
       mark_benchmark_start()
 
       -- Prefer solution files
+      -- Classic .sln first: .slnx is written by the SDK-style generator and can be
+      -- a single-project fragment pointing at a csproj Unity no longer emits.
+      local solutions = {}
       for entry, kind in vim.fs.dir(root_dir) do
-        if kind == 'file' and (vim.endswith(entry, '.sln') or vim.endswith(entry, '.slnx')) then
-          local sln_path = vim.fs.joinpath(root_dir, entry)
-          vim.notify('Initializing: solution ' .. sln_path, vim.log.levels.INFO)
-          ---@diagnostic disable-next-line: param-type-mismatch
-          client:notify('solution/open', { solution = vim.uri_from_fname(sln_path) })
-          return
-        end
+        if kind == 'file' and (vim.endswith(entry, '.sln') or vim.endswith(entry, '.slnx')) then table.insert(solutions, entry) end
+      end
+      table.sort(solutions, function(a, b)
+        local a_slnx, b_slnx = vim.endswith(a, '.slnx'), vim.endswith(b, '.slnx')
+        if a_slnx ~= b_slnx then return b_slnx end
+        return a < b
+      end)
+      if #solutions > 0 then
+        local sln_path = vim.fs.joinpath(root_dir, solutions[1])
+        vim.notify('Initializing: solution ' .. sln_path, vim.log.levels.INFO)
+        ---@diagnostic disable-next-line: param-type-mismatch
+        client:notify('solution/open', { solution = vim.uri_from_fname(sln_path) })
+        return
       end
 
       -- Fall back to project files

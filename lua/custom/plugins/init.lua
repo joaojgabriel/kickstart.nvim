@@ -60,16 +60,14 @@ do
     'https://github.com/Mathijs-Bakker/godotdev.nvim',
     'https://github.com/mfussenegger/nvim-dap',
     'https://github.com/rcarriga/nvim-dap-ui',
-    'https://github.com/nvim-treesitter/nvim-treesitter',
   }
 end
 
 -- Odin
-do
-  vim.pack.add { gh 'cephei8/odin.nvim' }
-end
+vim.pack.add { gh 'cephei8/odin.nvim' }
 
 -- Git
-do
-  vim.pack.add { gh 'NeogitOrg/neogit' }
-end
+vim.pack.add { gh 'NeogitOrg/neogit' }
+
+-- Global find and replace
+vim.pack.add { gh 'MagicDuck/grug-far.nvim' }
